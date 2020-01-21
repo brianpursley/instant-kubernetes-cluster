@@ -1,6 +1,6 @@
 # instant-kubernetes-cluster
 
-Automates the creation of a temporary Kubernetes single-node or multi-node cluster using [kind](https://kind.sigs.k8s.io/).
+Automates the creation of a temporary Kubernetes single-node or multi-node cluster using [kind](https://kind.sigs.k8s.io/), allowing you to spin up a cluster in one line, without having to install anything other than Docker.
 
 ## Prerequisites
 
