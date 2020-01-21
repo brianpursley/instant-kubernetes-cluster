@@ -10,12 +10,12 @@ Automates the creation of a temporary Kubernetes single-node or multi-node clust
 
 Create a single-node cluster:
 ```
-curl -s https://raw.githubusercontent.com/brianpursley/instant-kubernetes-cluster/master/run-cluster.sh | sh /dev/stdin --single-node
+sh <(curl -s https://raw.githubusercontent.com/brianpursley/instant-kubernetes-cluster/master/run-cluster.sh) --single-node
 ```
 
 Create a multi-node cluster:
 ```
-curl -s https://raw.githubusercontent.com/brianpursley/instant-kubernetes-cluster/master/run-cluster.sh | sh /dev/stdin --multi-node
+sh <(curl -s https://raw.githubusercontent.com/brianpursley/instant-kubernetes-cluster/master/run-cluster.sh) --multi-node
 ```
 
 ## Example Output
