@@ -10,7 +10,7 @@ fi
 
 cleanup() {
   echo
-  /tmp/kind delete cluster
+  /tmp/kind delete cluster || exit $?
   exit 0
 }
 trap "cleanup" INT TERM
@@ -20,15 +20,16 @@ case "$type" in
     /tmp/kind create cluster || exit $?
     ;;
   "--multi-node")
-    cat <<EOF | /tmp/kind create cluster --config=-
-      kind: Cluster
-      apiVersion: kind.x-k8s.io/v1alpha4
-      nodes:
-      - role: control-plane
-      - role: worker
-      - role: worker
-      - role: worker
+    cat >/tmp/multi-node.yaml <<EOF
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+- role: worker
+- role: worker
+- role: worker
 EOF
+    /tmp/kind create cluster --config /tmp/multi-node.yaml || exit $?
     ;;
   *)
     echo
