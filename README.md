@@ -15,58 +15,38 @@ Automates the creation of a temporary Kubernetes single-node or multi-node clust
 Usage: ./run-cluster.sh [type] [flags]
 
 type:
-  single                   run a single node cluster
-  multi                    run a multi-node cluster with one control plan node and three worker nodes
+  single                run a single node cluster
+  multi                 run a multi-node cluster with one control plan node and three worker nodes
 
 flags:
-  -h --help                show help
-  -m --metrics-server      include a metrics server in the cluster
+  -h --help             show help
+  -m --metrics-server   include a metrics server in the cluster
+  -p --port <port>      includes an nginx ingress for the specified port (can be used multiple times)
 ```
 
-## Example
+## Examples
 
-### Create a single-node cluster:
-```
-./run-cluster.sh
-```
+|Scenario|Example|
+|--|--|
+|Create a single-node cluster|`./run-cluster.sh`|
+|Create a single-node cluster with a metrics server|`./run-cluster.sh -m`|
+|Create a multi-node cluster:|`./run-cluster.sh multi`|
+|Create a multi-node cluster with a metrics server|`./run-cluster.sh multi -m`|
+|Create a multi-node cluster with nginx ingress for ports 8080 and 8081|`./run-cluster.sh multi -p 8080 -p 8081`|
 
-### Create a single-node cluster with a metrics server
-```
-./run-cluster.sh -m
-```
-
-### Create a multi-node cluster:
-```
-./run-cluster.sh multi
-```
-
-### Create a multi-node cluster with a metrics server
-```
-./run-cluster.sh multi -m
-```
-
-## Example (via curl)
-
-You can run the script via curl if you don't want to download the script.
-
-### Create a single-node cluster:
+### Direct usage via curl
+You can run the script directly via curl, like this:
 ```
 sh <(curl -s https://raw.githubusercontent.com/brianpursley/instant-kubernetes-cluster/master/run-cluster.sh)
 ```
 
-### Create a single-node cluster with a metrics server
+Or create an alias in your .bashrc, like this:
 ```
-sh <(curl -s https://raw.githubusercontent.com/brianpursley/instant-kubernetes-cluster/master/run-cluster.sh) -m
+alias run-cluster="sh <(curl -s https://raw.githubusercontent.com/brianpursley/instant-kubernetes-cluster/master/run-cluster.sh)"
 ```
-
-### Create a multi-node cluster:
+And then run it like this:
 ```
-sh <(curl -s https://raw.githubusercontent.com/brianpursley/instant-kubernetes-cluster/master/run-cluster.sh) multi
-```
-
-### Create a multi-node cluster with a metrics server
-```
-sh <(curl -s https://raw.githubusercontent.com/brianpursley/instant-kubernetes-cluster/master/run-cluster.sh) multi -m
+$ run-cluster <options>
 ```
 
 ## Example Output
