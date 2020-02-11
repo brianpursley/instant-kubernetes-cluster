@@ -1,6 +1,6 @@
 # instant-kubernetes-cluster
 
-Automates the creation of a temporary Kubernetes single-node or multi-node cluster using [kind](https://kind.sigs.k8s.io/), allowing you to spin up a cluster in one line, without having to install anything other than Docker.
+A bash script that automates the creation of a temporary Kubernetes single-node or multi-node cluster using [kind](https://kind.sigs.k8s.io/).
 
 ## Prerequisites
 
@@ -42,7 +42,7 @@ sh <(curl -s https://raw.githubusercontent.com/brianpursley/instant-kubernetes-c
 
 Or create an alias in your .bashrc, like this:
 ```
-alias run-cluster="sh <(curl -s https://raw.githubusercontent.com/brianpursley/instant-kubernetes-cluster/master/run-cluster.sh)"
+alias run-cluster="bash <(curl -s https://raw.githubusercontent.com/brianpursley/instant-kubernetes-cluster/master/run-cluster.sh)"
 ```
 And then run it like this:
 ```
