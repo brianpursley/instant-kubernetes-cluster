@@ -136,7 +136,7 @@ if [ "$METRICS" = true ]; then
   wget -q -O /tmp/metrics-server-master.zip https://github.com/kubernetes-sigs/metrics-server/archive/master.zip
   unzip -qq -u /tmp/metrics-server-master.zip -d /tmp
   rm /tmp/metrics-server-master.zip
-  kubectl apply -f /tmp/metrics-server-master/deploy/1.8+/
+  kubectl apply -f /tmp/metrics-server-master/deploy/kubernetes/
   rm -rf /tmp/metrics-server-master
   kubectl patch deploy metrics-server -n kube-system --type json --patch '[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"},{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname"}]'
 fi
