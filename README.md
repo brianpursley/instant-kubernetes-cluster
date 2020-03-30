@@ -20,8 +20,9 @@ type:
 
 flags:
   -h --help             show help
+  -d --dashboard        include a dashboard in the cluster
   -m --metrics-server   include a metrics server in the cluster
-  -p --port <port>      includes an nginx ingress for the specified port (can be used multiple times)
+  -p --port <port>      include an nginx ingress for the specified port (can be used multiple times)
 ```
 
 ## Examples

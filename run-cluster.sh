@@ -17,8 +17,9 @@ while test $# -gt 0; do
       echo 
       echo "flags:"
       echo "  -h --help             show help"
+      echo "  -d --dashboard        include a dashboard in the cluster"
       echo "  -m --metrics-server   include a metrics server in the cluster"
-      echo "  -p --port <port>      includes an nginx ingress for the specified port (can be used multiple times)"
+      echo "  -p --port <port>      include an nginx ingress for the specified port (can be used multiple times)"
       echo
       exit 0
       ;;
@@ -38,6 +39,10 @@ while test $# -gt 0; do
       shift
       PORTS+=($1)
       shift
+      ;;
+    -d|--dashboard)
+      shift
+      DASHBOARD=true
       ;;
     *)
       echo "unknown argument: $1"
@@ -106,6 +111,10 @@ fi
 # Trap SIGINT and SIGTERM so that the cluster can be shut down when Ctrl+C is pressed
 cleanup() {
   echo
+  if [ -n "$PROXYPID" ]; then
+    echo "Stopping kubectl proxy ..."
+    kill $PROXYPID
+  fi
   /tmp/kind delete cluster || exit $?
   exit 0
 }
@@ -118,7 +127,7 @@ echo "Creating a $TYPE node cluster"
 # Deploy nginx components if ports are specified
 if [ ${#PORTS[@]} -gt 0 ]; then
   echo
-  echo "Deploying nginx components for ingress"
+  echo "Deploying nginx components for ingress ..."
   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.27.0/deploy/static/mandatory.yaml
   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.27.0/deploy/static/provider/baremetal/service-nodeport.yaml
   CONFIG='{"spec":{"template":{"spec":{"containers":[{"name":"nginx-ingress-controller","ports":['
@@ -126,19 +135,41 @@ if [ ${#PORTS[@]} -gt 0 ]; then
     CONFIG="$CONFIG{\"containerPort\":$PORT,\"hostPort\":$PORT},"
   done
   CONFIG=${CONFIG%?}']}],"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}' 
-  kubectl patch deployments -n ingress-nginx nginx-ingress-controller -p $CONFIG  
+  kubectl patch deployments -n ingress-nginx nginx-ingress-controller -p $CONFIG
+  echo "Nginx components for ingress deployed"
 fi
 
 # Deploy metrics server if metrics flag is specified
 if [ "$METRICS" = true ]; then
   echo 
-  echo "Deploying metrics server"
+  echo "Deploying metrics server ..."
   wget -q -O /tmp/metrics-server-master.zip https://github.com/kubernetes-sigs/metrics-server/archive/master.zip
   unzip -qq -u /tmp/metrics-server-master.zip -d /tmp
   rm /tmp/metrics-server-master.zip
   kubectl apply -f /tmp/metrics-server-master/deploy/kubernetes/
   rm -rf /tmp/metrics-server-master
   kubectl patch deploy metrics-server -n kube-system --type json --patch '[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"},{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname"}]'
+  echo "Metrics server deployed"
+fi
+
+# Deploy dashboard if dashboard flag is specified
+if [ "$DASHBOARD" = true ]; then
+  echo
+  echo "Deploying dashboard ..."
+  kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc7/aio/deploy/recommended.yaml
+  kubectl create clusterrolebinding default-admin --clusterrole cluster-admin --serviceaccount=default:default
+  echo "Waiting for dashboard to become available..."
+  kubectl wait --for=condition=Available deploy/kubernetes-dashboard -n kubernetes-dashboard --timeout 5m
+  TOKEN=$(kubectl get secrets -o jsonpath="{.items[?(@.metadata.annotations['kubernetes\.io/service-account\.name']=='default')].data.token}"|base64 -d)
+  kubectl proxy > /dev/null &
+  PROXYPID=$!
+  echo "Dashboard deployed"
+  echo
+  echo "Dashboard URL:" 
+  echo "http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/"
+  echo
+  echo "Dashboard Authentication Token:"
+  echo $TOKEN
 fi
 
 # Display success message and wait for Ctrl+C to be pressed
