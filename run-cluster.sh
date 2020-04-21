@@ -12,14 +12,15 @@ while test $# -gt 0; do
       echo "Usage: $0 [type] [flags]"
       echo
       echo "type:"
-      echo "  single                run a single node cluster"
-      echo "  multi                 run a multi-node cluster with one control plan node and three worker nodes"
+      echo "  single                  run a single node cluster"
+      echo "  multi                   run a multi-node cluster with one control plan node and three worker nodes"
       echo 
       echo "flags:"
-      echo "  -h --help             show help"
-      echo "  -d --dashboard        include a dashboard in the cluster"
-      echo "  -m --metrics-server   include a metrics server in the cluster"
-      echo "  -p --port <port>      include an nginx ingress for the specified port (can be used multiple times)"
+      echo "  -h --help               show help"
+      echo "  -d --dashboard          include a dashboard in the cluster"
+      echo "  -m --metrics-server     include a metrics server in the cluster"
+      echo "  -p --port <port>        include an nginx ingress for the specified port (can be used multiple times)"
+      echo "  -v --version <version>  use a specific version of Kubernetes"
       echo
       exit 0
       ;;
@@ -31,6 +32,10 @@ while test $# -gt 0; do
       TYPE=multi
       shift
       ;;
+    -d|--dashboard)
+      shift
+      DASHBOARD=true
+      ;;
     -m|--metrics-server)
       METRICS=true
       shift
@@ -40,9 +45,10 @@ while test $# -gt 0; do
       PORTS+=($1)
       shift
       ;;
-    -d|--dashboard)
+    -v|--version)
       shift
-      DASHBOARD=true
+      VERSION=$1
+      shift
       ;;
     *)
       echo "unknown argument: $1"
@@ -70,12 +76,17 @@ if test ! -f /tmp/kind; then
   chmod +x /tmp/kind
 fi
 
+if [ -n "$VERSION" ]; then
+  IMAGE_YAML_FRAGMENT="image: kindest/node:v${VERSION}"
+fi
+
 # Start building cluster config file
 cat > /tmp/cluster.yaml << EOF
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
+  ${IMAGE_YAML_FRAGMENT}
 EOF
 
 # Add extraPortMappings for ingress if ports are specified
@@ -103,8 +114,11 @@ fi
 if [ "$TYPE" = "multi" ]; then
   cat >> /tmp/cluster.yaml << EOF
 - role: worker
+  ${IMAGE_YAML_FRAGMENT}
+- role: IMAGE_YAML_FRAGMENT
+  ${IMAGE_YAML}
 - role: worker
-- role: worker
+  ${IMAGE_YAML}
 EOF
 fi
 

@@ -15,14 +15,15 @@ A bash script that automates the creation of a temporary Kubernetes single-node 
 Usage: ./run-cluster.sh [type] [flags]
 
 type:
-  single                run a single node cluster
-  multi                 run a multi-node cluster with one control plan node and three worker nodes
+  single                  run a single node cluster
+  multi                   run a multi-node cluster with one control plan node and three worker nodes
 
 flags:
-  -h --help             show help
-  -d --dashboard        include a dashboard in the cluster
-  -m --metrics-server   include a metrics server in the cluster
-  -p --port <port>      include an nginx ingress for the specified port (can be used multiple times)
+  -h --help               show help
+  -d --dashboard          include a dashboard in the cluster
+  -m --metrics-server     include a metrics server in the cluster
+  -p --port <port>        include an nginx ingress for the specified port (can be used multiple times)
+  -v --version <version>  use a specific version of Kubernetes
 ```
 
 ## Examples
@@ -34,6 +35,7 @@ flags:
 |Create a multi-node cluster:|`./run-cluster.sh multi`|
 |Create a multi-node cluster with a metrics server|`./run-cluster.sh multi -m`|
 |Create a multi-node cluster with nginx ingress for ports 8080 and 8081|`./run-cluster.sh multi -p 8080 -p 8081`|
+|Create a single-node cluster using Kubernetes 1.18.0|`./run-cluster.sh -v 1.18.0`|
 
 ### Direct usage via curl
 You can run the script directly via curl, like this:
@@ -87,5 +89,5 @@ ERROR: node(s) already exist for a cluster with the name "kind"
 
 In both of these cases, you can manually delete the cluster by running:
 ```
-/tmp/kind delete customer
+/tmp/kind delete cluster
 ```
