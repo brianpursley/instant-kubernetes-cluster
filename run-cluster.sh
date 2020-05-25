@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e 
 
+KIND_VERSION="0.8.1"
 TYPE=single
 PORTS=()
+
 while test $# -gt 0; do
   case "$1" in
     -h|--help)
@@ -18,6 +20,7 @@ while test $# -gt 0; do
       echo "flags:"
       echo "  -h --help               show help"
       echo "  -d --dashboard          include a dashboard in the cluster"
+      echo "  -k --kind-version       use a specific version of kind"
       echo "  -m --metrics-server     include a metrics server in the cluster"
       echo "  -p --port <port>        include an nginx ingress for the specified port (can be used multiple times)"
       echo "  -v --version <version>  use a specific version of Kubernetes"
@@ -35,6 +38,11 @@ while test $# -gt 0; do
     -d|--dashboard)
       shift
       DASHBOARD=true
+      ;;
+    -k|--kind-version)
+      shift
+      KIND_VERSION=$1
+      shift
       ;;
     -m|--metrics-server)
       METRICS=true
@@ -70,10 +78,11 @@ checkDependency unzip
 checkDependency kubectl
 
 # Download kind
-if test ! -f /tmp/kind; then
-  echo "Downloading kind"
-  wget -q -O /tmp/kind https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64
-  chmod +x /tmp/kind
+KIND="/tmp/kind-$KIND_VERSION"
+if test ! -f $KIND; then
+  echo "Downloading kind ($KIND_VERSION)"
+  wget -q -O $KIND https://github.com/kubernetes-sigs/kind/releases/download/v$KIND_VERSION/kind-$(uname)-amd64
+  chmod +x $KIND
 fi
 
 if [ -n "$VERSION" ]; then
@@ -129,14 +138,14 @@ cleanup() {
     echo "Stopping kubectl proxy ..."
     kill $PROXYPID
   fi
-  /tmp/kind delete cluster || exit $?
+  $KIND delete cluster || exit $?
   exit 0
 }
 trap "cleanup" INT TERM
 
 # Create the cluster
 echo "Creating a $TYPE node cluster"
-/tmp/kind create cluster --config /tmp/cluster.yaml || exit $?
+$KIND create cluster --config /tmp/cluster.yaml || exit $?
 
 # Deploy nginx components if ports are specified
 if [ ${#PORTS[@]} -gt 0 ]; then
@@ -188,3 +197,4 @@ echo "Your cluster is running"
 echo "Press Ctrl+C to stop and delete the cluster"
 echo
 while [ 1 ]; do read _; done
+

@@ -21,6 +21,7 @@ type:
 flags:
   -h --help               show help
   -d --dashboard          include a dashboard in the cluster
+  -k --kind-version       use a specific version of kind
   -m --metrics-server     include a metrics server in the cluster
   -p --port <port>        include an nginx ingress for the specified port (can be used multiple times)
   -v --version <version>  use a specific version of Kubernetes
