@@ -124,10 +124,10 @@ if [ "$TYPE" = "multi" ]; then
   cat >> /tmp/cluster.yaml << EOF
 - role: worker
   ${IMAGE_YAML_FRAGMENT}
-- role: IMAGE_YAML_FRAGMENT
-  ${IMAGE_YAML}
 - role: worker
-  ${IMAGE_YAML}
+  ${IMAGE_YAML_FRAGMENT}
+- role: worker
+  ${IMAGE_YAML_FRAGMENT}
 EOF
 fi
 
